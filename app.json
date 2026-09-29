@@ -1,0 +1,83 @@
+{
+  "expo": {
+    "name": "Armazém",
+    "slug": "armazem",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "icon": {
+        "light": "./assets/icon.png",
+        "dark": "./assets/icon-escuro.png"
+      },
+      "bundleIdentifier": "com.eduardotmendes.armazem",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#3A8763",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA"
+      ],
+      "package": "com.eduardotmendes.armazem"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permita o acesso à câmera para escanear códigos de barras dos produtos.",
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": true
+        }
+      ],
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "resizeMode": "contain",
+          "backgroundColor": "#F3F6F4",
+          "dark": {
+            "image": "./assets/splash-icon.png",
+            "backgroundColor": "#0E1411"
+          }
+        }
+      ],
+      "expo-image",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permita o acesso às fotos para escolher a foto dos produtos.",
+          "cameraPermission": "Permita o acesso à câmera para tirar a foto dos produtos.",
+          "microphonePermission": false
+        }
+      ]
+    ],
+    "scheme": "armazem",
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "1717049a-1e44-4308-a1fd-cb0ee01f5443"
+      }
+    },
+    "owner": "eduardotmendes"
+  }
+}
