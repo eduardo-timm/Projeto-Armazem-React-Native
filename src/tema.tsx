@@ -1,4 +1,3 @@
-import Armazenamento from 'expo-sqlite/kv-store';
 import {
   createContext,
   useCallback,
@@ -8,7 +7,9 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { Appearance, useColorScheme } from 'react-native';
+import { Appearance, Platform, useColorScheme } from 'react-native';
+
+import { Armazenamento } from './utilitarios/armazenamento';
 
 type Gradiente = readonly [string, string];
 
@@ -122,6 +123,8 @@ function lerPreferenciaSalva(): PreferenciaTema {
 
 /** Força o modo em tudo que é nativo (alertas, teclado, barra de status) ou volta a seguir o sistema. */
 function aplicarNoSistema(preferencia: PreferenciaTema) {
+  // Na web não existe setColorScheme; lá o tema é só o do app (calculado no ProvedorTema).
+  if (Platform.OS === 'web') return;
   Appearance.setColorScheme(
     preferencia === 'sistema' ? 'unspecified' : preferencia === 'claro' ? 'light' : 'dark'
   );

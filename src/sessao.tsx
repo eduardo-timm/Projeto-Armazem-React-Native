@@ -1,7 +1,7 @@
-import Armazenamento from 'expo-sqlite/kv-store';
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
 import { criarClienteSupabase, type Acesso, type ClienteSupabase } from './banco/supabase';
+import { Armazenamento } from './utilitarios/armazenamento';
 import { mensagemDeErro } from './utilitarios/erros';
 
 export const USUARIOS_EQUIPE = ['Eduardo', 'Tomás', 'Tiago'] as const;

@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
-import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { obterResumo } from '../banco/banco';
@@ -13,6 +13,7 @@ import { useCarregarAoFocar } from '../hooks/useCarregarAoFocar';
 import { usePerfis } from '../perfis';
 import { useSessaoAtiva } from '../sessao';
 import { espaco, raio, useEstilos, useTema, type Tema } from '../tema';
+import { alertar } from '../utilitarios/alerta';
 import { formatarMoeda } from '../utilitarios/formatacao';
 
 export default function TelaInicial() {
@@ -31,12 +32,12 @@ export default function TelaInicial() {
   /** Na equipe volta para "Quem é você?"; no modo teste volta para a tela do código. */
   function confirmarSaida() {
     if (modoTeste) {
-      Alert.alert('Sair do modo Teste?', 'Você volta para a tela do código da equipe.', [
+      alertar('Sair do modo Teste?', 'Você volta para a tela do código da equipe.', [
         { text: 'Cancelar', style: 'cancel' },
         { text: 'Sair', style: 'destructive', onPress: sair },
       ]);
     } else {
-      Alert.alert(`Sair da conta de ${usuario}?`, 'Você volta para escolher quem está usando.', [
+      alertar(`Sair da conta de ${usuario}?`, 'Você volta para escolher quem está usando.', [
         { text: 'Cancelar', style: 'cancel' },
         { text: 'Sair', style: 'destructive', onPress: trocarUsuario },
       ]);

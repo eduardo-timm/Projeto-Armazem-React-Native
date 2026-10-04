@@ -57,14 +57,17 @@ export async function listarProdutos(db: ClienteSupabase) {
   return verificar(await db.from('produtos').select('*').order('nome'));
 }
 
+/** Texto sem acentos e em minúsculas, para pesquisas ("Feijão" → "feijao"). */
+export function normalizarTexto(texto: string) {
+  return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
 /** Pesquisa sem diferenciar maiúsculas nem acentos ("feijao" encontra "Feijão"). */
 export function combinaComPesquisa(produto: Produto, pesquisa: string) {
-  const normalizar = (t: string) =>
-    t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  const termo = normalizar(pesquisa.trim());
+  const termo = normalizarTexto(pesquisa.trim());
   if (!termo) return true;
   return [produto.nome, produto.codigo_barras, produto.categoria].some(
-    (campo) => campo && normalizar(campo).includes(termo)
+    (campo) => campo && normalizarTexto(campo).includes(termo)
   );
 }
 
@@ -189,6 +192,36 @@ export async function salvarFotoPerfil(
       .from('perfis')
       .upsert({ usuario, caminho_foto: caminho }, { onConflict: 'espaco,usuario' })
   );
+}
+
+export type Categoria = { nome: string; totalProdutos: number };
+
+/** Categorias do espaço atual (em ordem alfabética), com quantos produtos cada uma tem. */
+export async function listarCategorias(db: ClienteSupabase): Promise<Categoria[]> {
+  const linhas = verificar(await db.from('categorias').select('nome, produtos(count)'));
+  return (linhas ?? [])
+    .map(({ nome, produtos }) => ({ nome, totalProdutos: produtos[0]?.count ?? 0 }))
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }));
+}
+
+/** Cria a categoria e devolve o nome salvo. */
+export async function criarCategoria(db: ClienteSupabase, nome: string) {
+  const criada = verificar(
+    await db.from('categorias').insert({ nome: nome.trim() }).select('nome').single()
+  );
+  if (!criada) throw new Error('Não foi possível criar a categoria.');
+  return criada.nome;
+}
+
+/** Renomeia a categoria. Os produtos dela passam a usar o nome novo (on update cascade). */
+export async function renomearCategoria(db: ClienteSupabase, nomeAtual: string, nomeNovo: string) {
+  verificar(await db.from('categorias').update({ nome: nomeNovo.trim() }).eq('nome', nomeAtual));
+  return nomeNovo.trim();
+}
+
+/** Exclui a categoria. Os produtos dela ficam sem categoria (on delete set null). */
+export async function excluirCategoria(db: ClienteSupabase, nome: string) {
+  verificar(await db.from('categorias').delete().eq('nome', nome));
 }
 
 export async function obterResumo(db: ClienteSupabase): Promise<ResumoStock> {

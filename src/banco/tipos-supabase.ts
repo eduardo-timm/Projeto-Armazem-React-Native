@@ -15,6 +15,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      categorias: {
+        Row: {
+          criado_em: string
+          espaco: string
+          nome: string
+        }
+        Insert: {
+          criado_em?: string
+          espaco?: string
+          nome: string
+        }
+        Update: {
+          criado_em?: string
+          espaco?: string
+          nome?: string
+        }
+        Relationships: []
+      }
       movimentacoes: {
         Row: {
           criado_em: string
@@ -117,7 +135,15 @@ export type Database = {
           quantidade?: number
           quantidade_minima?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "produtos_categoria_fkey"
+            columns: ["espaco", "categoria"]
+            isOneToOne: false
+            referencedRelation: "categorias"
+            referencedColumns: ["espaco", "nome"]
+          },
+        ]
       }
     }
     Views: {

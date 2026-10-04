@@ -13,6 +13,7 @@ import {
   enviarFoto,
   type DadosProduto,
 } from '../banco/banco';
+import { SeletorCategoria } from '../componentes/SeletorCategoria';
 import { SeletorFoto } from '../componentes/SeletorFoto';
 import { Botao, Campo } from '../componentes/ui';
 import { useSessaoAtiva } from '../sessao';
@@ -35,7 +36,7 @@ export default function TelaFormularioProduto() {
 
   const [nome, setNome] = useState('');
   const [codigo, setCodigo] = useState(parametros.codigo ?? '');
-  const [categoria, setCategoria] = useState('');
+  const [categoria, setCategoria] = useState<string | null>(null);
   const [descricao, setDescricao] = useState('');
   const [quantidade, setQuantidade] = useState('');
   const [quantidadeMinima, setQuantidadeMinima] = useState('');
@@ -54,7 +55,7 @@ export default function TelaFormularioProduto() {
         if (!p) return;
         setNome(p.nome);
         setCodigo(p.codigo_barras ?? '');
-        setCategoria(p.categoria ?? '');
+        setCategoria(p.categoria);
         setDescricao(p.descricao ?? '');
         setQuantidadeMinima(String(p.quantidade_minima));
         setPreco(p.preco_unitario ? p.preco_unitario.toFixed(2).replace('.', ',') : '');
@@ -92,7 +93,7 @@ export default function TelaFormularioProduto() {
       const dados: DadosProduto = {
         nome,
         codigo_barras: codigoLimpo || null,
-        categoria: categoria || null,
+        categoria,
         descricao: descricao || null,
         quantidade_minima: converterInteiro(quantidadeMinima),
         preco_unitario: converterDecimal(preco),
@@ -153,13 +154,7 @@ export default function TelaFormularioProduto() {
           keyboardType="number-pad"
           erro={erros.codigo}
         />
-        <Campo
-          rotulo="Categoria"
-          icone="pricetag-outline"
-          value={categoria}
-          onChangeText={setCategoria}
-          placeholder="Ex.: Alimentos"
-        />
+        <SeletorCategoria categoria={categoria} aoMudar={setCategoria} />
         <View style={estilos.linha}>
           {/* Na edição, a quantidade só muda por entrada/saída (para ficar no histórico). */}
           {!idEdicao && (

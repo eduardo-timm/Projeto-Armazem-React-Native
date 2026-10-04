@@ -29,6 +29,11 @@ Dados ficam no **Supabase** (projeto "Estoque App"), compartilhados pela equipe:
 - A preferência (Sistema / Claro / Escuro) fica salva em `expo-sqlite/kv-store` e é aplicada
   também no nativo com `Appearance.setColorScheme` (alertas, teclado). Os controles ficam em
   `src/componentes/SeletorTema.tsx` (botão no topo da tela inicial + seção "Aparência").
+- **Web** (`npx expo start --web`): nunca use `Alert.alert` direto, use `alertar`
+  (`utilitarios/alerta.ts`; na web vira `window.alert`/`confirm`, já que o Alert do RN não aparece lá).
+  Preferências: importe `Armazenamento` de `utilitarios/armazenamento.ts` (kv-store no celular,
+  localStorage na web). APIs só do celular (ex.: `Appearance.setColorScheme`) ficam atrás de
+  `Platform.OS !== 'web'`.
 - Componentes base (`Botao`, `Campo`, `Cartao`, `SeloSituacao`, `EstadoVazio`) ficam em
   `src/componentes/ui.tsx`. Reaproveite antes de criar outro.
 - Use `npx expo install` para instalar pacotes (nunca `npm install <pacote>` direto).
@@ -72,12 +77,15 @@ src/
     CameraSegura.tsx           # Wrapper do CameraView com correção da tela preta no iOS
     CartaoProduto.tsx
     FotoProduto.tsx            # Mostra a foto (caminho no Storage ou URI local)
+    SeletorCategoria.tsx       # Campo de categoria: escolher / criar / renomear / excluir (Modal)
     SeletorFoto.tsx            # Campo de foto do formulário: câmera / galeria / remover
     SeletorTema.tsx            # Sistema/Claro/Escuro + botão de alternar
     ui.tsx
   utilitarios/formatacao.ts    # Moeda, números e data/hora
   utilitarios/erros.ts         # Mensagens de erro amigáveis (sem internet, código duplicado…)
   utilitarios/fotos.ts         # escolherFoto: câmera/galeria + recorte quadrado + reduz p/ JPEG 1024px
+  utilitarios/alerta.ts        # alertar: Alert no celular, alert/confirm na web (alerta.web.ts)
+  utilitarios/armazenamento.ts # Armazenamento: kv-store no celular, localStorage na web (.web.ts)
 supabase/migrations/          # SQL aplicado no Supabase (histórico do esquema)
   tema.tsx                     # Cores claras/escuras, ProvedorTema, useTema, useEstilos
 scripts/gerar-imagens.mjs      # Gera ícone, ícones Android, splash e favicon a partir de SVG
@@ -159,6 +167,11 @@ Projeto **"Estoque App"** (`ttbofisxluiptraogxpi`). URL e chave publicável fica
 - `produtos`: id (uuid), nome, codigo_barras (opcional, único **por espaço**), categoria,
   descricao, quantidade, quantidade_minima, preco_unitario, caminho_foto, espaco, criado_em,
   atualizado_em.
+- `categorias`: espaco + nome (chave primária; nome único por espaço ignorando maiúsculas,
+  até 40 caracteres), criado_em. `produtos.categoria` guarda o **nome** com chave estrangeira
+  (espaco, categoria) → categorias: renomear atualiza os produtos (on update cascade) e excluir
+  deixa os produtos sem categoria (on delete set null). No formulário, a categoria é escolhida
+  com `<SeletorCategoria>` (nunca digitada livremente).
 - `movimentacoes`: produto_id, tipo ('entrada'|'saida'), quantidade, usuario, espaco, criado_em.
 - `registrar_movimentacao(...)`: entrada/saída **atômica** (atualiza a quantidade e grava o
   histórico juntos; recusa saída maior que o stock). **Sempre** mude quantidade por ela, nunca

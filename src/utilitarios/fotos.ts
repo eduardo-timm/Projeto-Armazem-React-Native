@@ -1,6 +1,8 @@
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
-import { Alert, Linking } from 'react-native';
+import { Linking } from 'react-native';
+
+import { alertar } from './alerta';
 
 export type OrigemFoto = 'camera' | 'galeria';
 
@@ -41,7 +43,7 @@ export async function escolherFoto(origem: OrigemFoto): Promise<string | null> {
 async function temPermissaoCamera() {
   const permissao = await ImagePicker.requestCameraPermissionsAsync();
   if (permissao.granted) return true;
-  Alert.alert(
+  alertar(
     'Sem acesso à câmera',
     'Permita o acesso à câmera nos ajustes do celular para tirar a foto.',
     permissao.canAskAgain

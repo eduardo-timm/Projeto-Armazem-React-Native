@@ -3,7 +3,6 @@ import * as Haptics from 'expo-haptics';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
-  Alert,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -35,6 +34,7 @@ import {
 import { useCarregarAoFocar } from '../../hooks/useCarregarAoFocar';
 import { useSessaoAtiva, type Usuario } from '../../sessao';
 import { espaco, raio, useEstilos, useTema, type Tema } from '../../tema';
+import { alertar } from '../../utilitarios/alerta';
 import { mostrarErro } from '../../utilitarios/erros';
 import { converterInteiro, formatarDataHora, formatarMoeda } from '../../utilitarios/formatacao';
 
@@ -85,7 +85,7 @@ export default function TelaDetalhesProduto() {
   }
 
   function confirmarExclusao(nome: string) {
-    Alert.alert('Excluir produto', `Deseja excluir "${nome}"? O histórico dele também será apagado.`, [
+    alertar('Excluir produto', `Deseja excluir "${nome}"? O histórico dele também será apagado.`, [
       { text: 'Cancelar', style: 'cancel' },
       {
         text: 'Excluir',

@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '../componentes/Avatar';
 import { USUARIOS_EQUIPE, useSessao } from '../sessao';
 import { espaco, raio, useEstilos, useTema, type Tema } from '../tema';
+import { alertar } from '../utilitarios/alerta';
 
 /** Escolha rápida de quem está usando o app (sem senha). Fica registrado no histórico. */
 export default function TelaQuemEVoce() {
@@ -14,7 +15,7 @@ export default function TelaQuemEVoce() {
   const { escolherUsuario, sair } = useSessao();
 
   function confirmarSaida() {
-    Alert.alert(
+    alertar(
       'Sair deste celular?',
       'Vai ser preciso digitar o código da equipe de novo.',
       [
