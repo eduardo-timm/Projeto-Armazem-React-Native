@@ -17,7 +17,7 @@ import { SeletorCategoria } from '../componentes/SeletorCategoria';
 import { SeletorFoto } from '../componentes/SeletorFoto';
 import { Botao, Campo } from '../componentes/ui';
 import { useSessaoAtiva } from '../sessao';
-import { espaco, useEstilos, type Tema } from '../tema';
+import { espaco, fonte, linha, raio, useEstilos, type Tema } from '../tema';
 import { mostrarErro } from '../utilitarios/erros';
 import { converterDecimal, converterInteiro } from '../utilitarios/formatacao';
 
@@ -121,13 +121,14 @@ export default function TelaFormularioProduto() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}>
       <Stack.Screen options={{ title: idEdicao ? 'Editar produto' : 'Novo produto' }} />
+      <View style={estilos.regua} />
       <ScrollView
         contentContainerStyle={[estilos.conteudo, { paddingBottom: margens.bottom + espaco(6) }]}
         keyboardShouldPersistTaps="handled">
         {parametros.codigo && !idEdicao ? (
           <View style={estilos.aviso}>
             <Text style={estilos.textoAviso}>
-              O código <Text style={{ fontWeight: '800' }}>{parametros.codigo}</Text> ainda não
+              O código <Text style={{ fontFamily: fonte.forte }}>{parametros.codigo}</Text> ainda não
               está cadastrado. Preencha os dados abaixo.
             </Text>
           </View>
@@ -165,6 +166,7 @@ export default function TelaFormularioProduto() {
                 onChangeText={setQuantidade}
                 placeholder="0"
                 keyboardType="number-pad"
+                style={estilos.campoNumero}
               />
             </View>
           )}
@@ -175,6 +177,7 @@ export default function TelaFormularioProduto() {
               onChangeText={setQuantidadeMinima}
               placeholder="0"
               keyboardType="number-pad"
+              style={estilos.campoNumero}
             />
           </View>
         </View>
@@ -197,7 +200,7 @@ export default function TelaFormularioProduto() {
 
         <Botao
           titulo={idEdicao ? 'Salvar alterações' : 'Cadastrar produto'}
-          icone="checkmark-circle"
+          icone="checkmark"
           aoPressionar={salvar}
           carregando={salvando}
           estilo={{ marginTop: espaco(2) }}
@@ -208,8 +211,16 @@ export default function TelaFormularioProduto() {
 }
 
 const criarEstilos = ({ cores }: Tema) => StyleSheet.create({
-  conteudo: { padding: espaco(5), gap: espaco(4) },
+  regua: { height: linha.forte, backgroundColor: cores.divisor },
+  conteudo: { padding: espaco(5), gap: espaco(4.5) },
   linha: { flexDirection: 'row', gap: espaco(3) },
-  aviso: { backgroundColor: cores.superficieSuave, borderRadius: 14, padding: espaco(4) },
-  textoAviso: { color: cores.texto, fontSize: 14, lineHeight: 20 },
+  campoNumero: { fontSize: 18, fontFamily: fonte.forte },
+  aviso: {
+    backgroundColor: cores.alertaFundo,
+    borderTopWidth: linha.forte,
+    borderTopColor: cores.primaria,
+    borderRadius: raio.medio,
+    padding: espaco(3.5),
+  },
+  textoAviso: { color: cores.alerta, fontSize: 14, fontFamily: fonte.normal, lineHeight: 20 },
 });

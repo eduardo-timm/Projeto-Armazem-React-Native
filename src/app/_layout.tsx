@@ -1,12 +1,22 @@
+import {
+  Archivo_400Regular,
+  Archivo_600SemiBold,
+  Archivo_800ExtraBold,
+  useFonts,
+} from '@expo-google-fonts/archivo';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
 import { AberturaAnimada } from '../componentes/AberturaAnimada';
 import { ProvedorPerfis } from '../perfis';
 import { ProvedorSessao, useSessao } from '../sessao';
-import { ProvedorTema, useTema } from '../tema';
+import { fonte, ProvedorTema, useTema } from '../tema';
 
 export default function LayoutPrincipal() {
+  // A splash nativa continua na tela (AberturaAnimada segura) até a fonte carregar.
+  const [fontesProntas] = useFonts({ Archivo_400Regular, Archivo_600SemiBold, Archivo_800ExtraBold });
+  if (!fontesProntas) return null;
+
   return (
     <ProvedorTema>
       <ProvedorSessao>
@@ -32,7 +42,7 @@ function Navegacao() {
       background: cores.fundo,
       card: cores.fundo,
       text: cores.texto,
-      border: cores.borda,
+      border: cores.divisor,
     },
   };
 
@@ -41,8 +51,8 @@ function Navegacao() {
       <StatusBar style={esquema === 'escuro' ? 'light' : 'dark'} />
       <Stack
         screenOptions={{
-          headerTintColor: cores.primaria,
-          headerTitleStyle: { color: cores.texto, fontWeight: '700' },
+          headerTintColor: cores.texto,
+          headerTitleStyle: { color: cores.texto, fontFamily: fonte.forte, fontSize: 18 },
           headerShadowVisible: false,
           headerStyle: { backgroundColor: cores.fundo },
           contentStyle: { backgroundColor: cores.fundo },

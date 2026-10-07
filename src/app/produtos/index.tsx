@@ -9,7 +9,7 @@ import { CartaoProduto } from '../../componentes/CartaoProduto';
 import { Botao, EstadoCarregamento, EstadoVazio } from '../../componentes/ui';
 import { useCarregarAoFocar } from '../../hooks/useCarregarAoFocar';
 import { useSessaoAtiva } from '../../sessao';
-import { espaco, raio, useEstilos, useTema, type Tema } from '../../tema';
+import { espaco, fonte, linha, raio, useEstilos, useTema, type Tema } from '../../tema';
 
 type Filtro = 'todos' | 'alerta' | 'ok';
 
@@ -51,42 +51,58 @@ export default function TelaProdutos() {
         options={{
           headerRight: () => (
             <Pressable onPress={() => router.push('/escanear')} hitSlop={10}>
-              <Ionicons name="scan" size={24} color={cores.primaria} />
+              <Ionicons name="scan" size={24} color={cores.primariaForte} />
             </Pressable>
           ),
         }}
       />
+      <View style={estilos.regua} />
 
-      <View style={estilos.caixaPesquisa}>
-        <Ionicons name="search" size={18} color={cores.textoSuave} />
-        <TextInput
-          value={pesquisa}
-          onChangeText={setPesquisa}
-          placeholder="Pesquisar nome, código ou categoria"
-          placeholderTextColor={cores.textoSuave}
-          style={estilos.campoPesquisa}
-          returnKeyType="search"
-          clearButtonMode="while-editing"
-        />
-      </View>
+      <View style={estilos.topo}>
+        <View style={estilos.caixaPesquisa}>
+          <Ionicons name="search" size={18} color={cores.textoSuave} />
+          <TextInput
+            value={pesquisa}
+            onChangeText={setPesquisa}
+            placeholder="Pesquisar nome, código ou categoria"
+            placeholderTextColor={cores.textoSuave}
+            selectionColor={cores.primaria}
+            style={estilos.campoPesquisa}
+            returnKeyType="search"
+            clearButtonMode="while-editing"
+          />
+        </View>
 
-      <View style={estilos.filtros}>
-        {FILTROS.map((f) => (
-          <Pressable
-            key={f.chave}
-            onPress={() => setFiltro(f.chave)}
-            style={[estilos.chip, filtro === f.chave && estilos.chipAtivo]}>
-            <Text style={[estilos.textoChip, filtro === f.chave && estilos.textoChipAtivo]}>
-              {f.rotulo}
-            </Text>
-          </Pressable>
-        ))}
+        <View style={estilos.filtros}>
+          {FILTROS.map((f, i) => {
+            const ativo = filtro === f.chave;
+            return (
+              <Pressable
+                key={f.chave}
+                onPress={() => setFiltro(f.chave)}
+                style={({ pressed }) => [
+                  estilos.filtro,
+                  i > 0 && estilos.separadorFiltro,
+                  ativo && { backgroundColor: cores.primaria },
+                  pressed && !ativo && { backgroundColor: cores.superficie },
+                ]}>
+                <Text
+                  style={[estilos.textoFiltro, ativo && { color: cores.textoSobrePrimaria }]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit>
+                  {f.rotulo}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
 
       <FlatList
         data={visiveis}
         keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={[estilos.lista, { paddingBottom: margens.bottom + 100 }]}
+        style={estilos.lista}
+        contentContainerStyle={{ paddingBottom: espaco(4) }}
         keyboardDismissMode="on-drag"
         refreshControl={
           <RefreshControl refreshing={atualizando} onRefresh={atualizar} tintColor={cores.primaria} />
@@ -104,82 +120,71 @@ export default function TelaProdutos() {
             <EstadoCarregamento erro={erro} aoTentarDeNovo={recarregar} />
           ) : (
             <EstadoVazio
-            icone="cube-outline"
-            titulo={filtrando ? 'Nada encontrado' : 'Nenhum produto ainda'}
-            mensagem={
-              filtrando
-                ? 'Tente outra pesquisa ou filtro.'
-                : 'Escaneie um código de barras ou adicione um produto manualmente.'
-            }
-            acao={
-              filtrando ? undefined : (
-                <Botao
-                  titulo="Escanear agora"
-                  icone="scan"
-                  aoPressionar={() => router.push('/escanear')}
-                  estilo={{ marginTop: 10 }}
-                />
-              )
-            }
-          />
+              icone="cube-outline"
+              titulo={filtrando ? 'Nada encontrado' : 'Nenhum produto ainda'}
+              mensagem={
+                filtrando
+                  ? 'Tente outra pesquisa ou filtro.'
+                  : 'Escaneie um código de barras ou adicione um produto manualmente.'
+              }
+            />
           )
         }
       />
 
-      <Pressable
-        onPress={() => router.push('/formulario-produto')}
-        style={({ pressed }) => [
-          estilos.botaoFlutuante,
-          { bottom: margens.bottom + 20 },
-          pressed && { transform: [{ scale: 0.95 }] },
-        ]}>
-        <Ionicons name="add" size={30} color="#fff" />
-      </Pressable>
+      <View style={[estilos.barra, { paddingBottom: margens.bottom + espaco(3) }]}>
+        <Botao
+          titulo="Escanear"
+          icone="scan"
+          variante="secundario"
+          aoPressionar={() => router.push('/escanear')}
+          estilo={{ flex: 1 }}
+        />
+        <Botao
+          titulo="Novo produto"
+          icone="add"
+          aoPressionar={() => router.push('/formulario-produto')}
+          estilo={{ flex: 1.4 }}
+        />
+      </View>
     </View>
   );
 }
 
-const criarEstilos = ({ cores, sombra }: Tema) => StyleSheet.create({
+const criarEstilos = ({ cores }: Tema) => StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.fundo },
+  regua: { height: linha.forte, backgroundColor: cores.divisor },
+  topo: { paddingHorizontal: espaco(4), paddingTop: espaco(3.5), paddingBottom: espaco(3), gap: espaco(2.5) },
   caixaPesquisa: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginHorizontal: espaco(5),
-    marginTop: espaco(2),
-    paddingHorizontal: espaco(4),
-    height: 50,
+    paddingHorizontal: espaco(3),
+    height: 48,
     borderRadius: raio.medio,
+    borderWidth: 1.5,
+    borderColor: cores.divisor,
     backgroundColor: cores.superficie,
-    ...sombra,
   },
-  campoPesquisa: { flex: 1, fontSize: 16, color: cores.texto },
+  campoPesquisa: { flex: 1, fontSize: 15, fontFamily: fonte.normal, color: cores.texto },
   filtros: {
     flexDirection: 'row',
-    gap: 8,
-    paddingHorizontal: espaco(5),
-    paddingVertical: espaco(4),
+    borderWidth: 1.5,
+    borderColor: cores.divisor,
+    borderRadius: raio.medio,
+    overflow: 'hidden',
   },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: raio.pilula,
-    backgroundColor: cores.superficieSuave,
-  },
-  chipAtivo: { backgroundColor: cores.primaria },
-  textoChip: { fontSize: 13, fontWeight: '600', color: cores.textoSuave },
-  textoChipAtivo: { color: '#fff' },
-  lista: { paddingHorizontal: espaco(5), gap: espaco(3) },
-  botaoFlutuante: {
-    position: 'absolute',
-    right: espaco(5),
-    width: 62,
-    height: 62,
-    borderRadius: 31,
-    backgroundColor: cores.primaria,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...sombra,
-    shadowOpacity: 0.3,
+  filtro: { flex: 1, minHeight: 44, justifyContent: 'center', paddingHorizontal: espaco(3) },
+  separadorFiltro: { borderLeftWidth: 1.5, borderLeftColor: cores.divisor },
+  textoFiltro: { fontSize: 13, fontFamily: fonte.media, color: cores.texto },
+  lista: { flex: 1, borderTopWidth: linha.forte, borderTopColor: cores.divisor },
+  barra: {
+    flexDirection: 'row',
+    gap: espaco(2),
+    paddingHorizontal: espaco(4),
+    paddingTop: espaco(3),
+    borderTopWidth: linha.forte,
+    borderTopColor: cores.divisor,
+    backgroundColor: cores.fundo,
   },
 });

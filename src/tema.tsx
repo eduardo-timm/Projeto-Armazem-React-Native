@@ -13,57 +13,87 @@ import { Armazenamento } from './utilitarios/armazenamento';
 
 type Gradiente = readonly [string, string];
 
+/**
+ * Paleta "Modernist": tinta sobre fundo claro e um único vermelho de destaque.
+ * O vermelho é para a ação principal e pequenas ênfases; o resto é tinta e linhas.
+ */
 const coresClaras = {
-  primaria: '#3E8E68',
-  primariaEscura: '#2F7354',
-  destaque: '#7FD1A8',
-  gradiente: ['#3A8763', '#5D9C7B'] as Gradiente,
-  gradienteScanner: ['#3B8A87', '#4A7FA0'] as Gradiente,
+  primaria: '#EC3013',
+  /** Fundo de blocos vermelhos grandes (contraste melhor com texto branco). */
+  primariaEscura: '#DD2B0F',
+  primariaPressionada: '#AE1800',
+  /** Vermelho para TEXTO e ícones pequenos sobre o fundo (legível). */
+  primariaForte: '#AE1800',
+  destaque: '#EC3013',
+  // Mantidos para quem ainda usa LinearGradient: agora são cor chapada.
+  gradiente: ['#DD2B0F', '#DD2B0F'] as Gradiente,
+  gradienteScanner: ['#DD2B0F', '#DD2B0F'] as Gradiente,
 
-  fundo: '#F3F6F4',
-  superficie: '#FFFFFF',
-  superficieSuave: '#E9EFEB',
-  borda: '#DCE4DF',
+  fundo: '#F3F2F2',
+  superficie: '#EAE9E9',
+  superficieSuave: '#EAE7E7',
+  /** Linha fina (1px) entre itens. */
+  borda: '#C9C8C7',
+  /** Linha forte (2px) entre seções. */
+  divisor: '#A09E9D',
 
-  texto: '#16231C',
-  textoSuave: '#63746A',
+  texto: '#201E1D',
+  textoSuave: '#605D5D',
   textoSobrePrimaria: '#FFFFFF',
 
-  sucesso: '#16A34A',
-  sucessoFundo: '#DCFCE7',
-  alerta: '#D97706',
-  alertaFundo: '#FEF3C7',
-  perigo: '#DC2626',
-  perigoFundo: '#FEE2E2',
+  sucesso: '#201E1D',
+  sucessoFundo: '#EAE7E7',
+  alerta: '#7C1405',
+  alertaFundo: '#FFF2EF',
+  perigo: '#AE1800',
+  perigoFundo: '#FFE0D9',
+  esgotadoFundo: '#AE1800',
+  esgotadoTexto: '#FFFFFF',
 };
 
 export type Cores = typeof coresClaras;
 
 const coresEscuras: Cores = {
-  primaria: '#4FA27B',
-  primariaEscura: '#3E8E68',
-  destaque: '#8EDCB4',
-  gradiente: ['#2F6E52', '#46836A'],
-  gradienteScanner: ['#2E6F6D', '#3A6485'],
+  primaria: '#EC3013',
+  primariaEscura: '#DD2B0F',
+  primariaPressionada: '#AE1800',
+  primariaForte: '#FF9783',
+  destaque: '#EC3013',
+  gradiente: ['#DD2B0F', '#DD2B0F'],
+  gradienteScanner: ['#DD2B0F', '#DD2B0F'],
 
-  fundo: '#0E1411',
-  superficie: '#161E1A',
-  superficieSuave: '#1F2A24',
-  borda: '#2A3730',
+  fundo: '#181716',
+  superficie: '#262422',
+  superficieSuave: '#2D2B2B',
+  borda: '#3E3B3A',
+  divisor: '#6E6B6A',
 
-  texto: '#EEF3F0',
-  textoSuave: '#9AABA1',
+  texto: '#F3F2F2',
+  textoSuave: '#BAB6B6',
   textoSobrePrimaria: '#FFFFFF',
 
-  sucesso: '#4ADE80',
-  sucessoFundo: 'rgba(74,222,128,0.15)',
-  alerta: '#FBBF24',
-  alertaFundo: 'rgba(251,191,36,0.15)',
-  perigo: '#F87171',
-  perigoFundo: 'rgba(248,113,113,0.15)',
+  sucesso: '#F3F2F2',
+  sucessoFundo: '#2D2B2B',
+  alerta: '#FFC4B8',
+  alertaFundo: '#4D170E',
+  perigo: '#FF9783',
+  perigoFundo: '#4D170E',
+  esgotadoFundo: '#EC3013',
+  esgotadoTexto: '#FFFFFF',
 };
 
-export const raio = { pequeno: 10, medio: 16, grande: 24, pilula: 999 };
+/** Cantos "suaves". Para voltar ao visual reto do Modernist, zere os três primeiros. */
+export const raio = { pequeno: 6, medio: 10, grande: 16, pilula: 999 };
+
+/** Espessura das linhas: fina entre itens, forte entre seções. */
+export const linha = { fina: 1, forte: 2 };
+
+/** Archivo (carregada no _layout). Com fonte personalizada não use fontWeight. */
+export const fonte = {
+  normal: 'Archivo_400Regular',
+  media: 'Archivo_600SemiBold',
+  forte: 'Archivo_800ExtraBold',
+} as const;
 
 /** Escala de espaçamento em múltiplos de 4 (espaco(4) = 16). */
 export const espaco = (n: number) => n * 4;
@@ -84,16 +114,17 @@ export type Tema = {
   };
 };
 
+// Nada "flutua" neste visual: a sombra é mínima e só aparece em painéis por cima da tela.
 const TEMAS: Record<Esquema, Tema> = {
   claro: {
     esquema: 'claro',
     cores: coresClaras,
     sombra: {
-      shadowColor: '#1C3327',
-      shadowOpacity: 0.08,
-      shadowRadius: 16,
-      shadowOffset: { width: 0, height: 6 },
-      elevation: 4,
+      shadowColor: '#2D2B2B',
+      shadowOpacity: 0.14,
+      shadowRadius: 2,
+      shadowOffset: { width: 0, height: 1 },
+      elevation: 1,
     },
   },
   escuro: {
@@ -101,10 +132,10 @@ const TEMAS: Record<Esquema, Tema> = {
     cores: coresEscuras,
     sombra: {
       shadowColor: '#000',
-      shadowOpacity: 0.35,
-      shadowRadius: 16,
-      shadowOffset: { width: 0, height: 6 },
-      elevation: 2,
+      shadowOpacity: 0.3,
+      shadowRadius: 2,
+      shadowOffset: { width: 0, height: 1 },
+      elevation: 1,
     },
   },
 };

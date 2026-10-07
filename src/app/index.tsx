@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -8,11 +7,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { obterResumo } from '../banco/banco';
 import { Avatar } from '../componentes/Avatar';
 import { BotaoAlternarTema, SeletorTema } from '../componentes/SeletorTema';
-import { Botao, type NomeIcone } from '../componentes/ui';
+import { Botao, Rotulo, type NomeIcone } from '../componentes/ui';
 import { useCarregarAoFocar } from '../hooks/useCarregarAoFocar';
 import { usePerfis } from '../perfis';
 import { useSessaoAtiva } from '../sessao';
-import { espaco, raio, useEstilos, useTema, type Tema } from '../tema';
+import { espaco, fonte, linha, raio, useEstilos, useTema, type Tema } from '../tema';
 import { alertar } from '../utilitarios/alerta';
 import { formatarMoeda } from '../utilitarios/formatacao';
 
@@ -62,13 +61,13 @@ export default function TelaInicial() {
             accessibilityRole="button"
             accessibilityLabel="Trocar foto de perfil">
             <View>
-              <Avatar nome={usuario} tamanho={44} />
+              <Avatar nome={usuario} tamanho={46} />
               <View style={estilos.seloCamera}>
-                <Ionicons name="camera" size={11} color={cores.textoSobrePrimaria} />
+                <Ionicons name="camera" size={11} color={cores.fundo} />
               </View>
             </View>
             <View style={{ flexShrink: 1 }}>
-              <Text style={estilos.ola}>Olá, {usuario} 👋</Text>
+              <Text style={estilos.ola}>Olá, {usuario}</Text>
               <Text style={estilos.titulo}>Armazém</Text>
             </View>
           </Pressable>
@@ -76,22 +75,20 @@ export default function TelaInicial() {
             <BotaoAlternarTema />
             <Pressable
               onPress={confirmarSaida}
-              style={({ pressed }) => [estilos.botaoSair, pressed && { transform: [{ scale: 0.94 }] }]}
+              style={({ pressed }) => [estilos.botaoSair, pressed && { backgroundColor: cores.superficie }]}
               hitSlop={6}
               accessibilityRole="button"
               accessibilityLabel="Sair">
-              <Ionicons name="log-out-outline" size={22} color={cores.perigo} />
+              <Ionicons name="log-out-outline" size={21} color={cores.primariaForte} />
             </Pressable>
           </View>
         </View>
 
         {modoTeste && (
-          <Pressable style={estilos.faixaTeste} onPress={confirmarSaida}>
-            <Ionicons name="school-outline" size={18} color={cores.primaria} />
-            <Text style={estilos.textoFaixaTeste}>
-              Modo Teste: stock separado, não afeta a equipe.
-            </Text>
-            <Text style={estilos.linkFaixaTeste}>Sair</Text>
+          <Pressable style={estilos.faixa} onPress={confirmarSaida}>
+            <Ionicons name="school-outline" size={18} color={cores.primariaForte} />
+            <Text style={estilos.textoFaixa}>Modo Teste: stock separado, não afeta a equipe.</Text>
+            <Text style={estilos.linkFaixa}>Sair</Text>
           </Pressable>
         )}
 
@@ -102,70 +99,80 @@ export default function TelaInicial() {
           </Pressable>
         )}
 
-        <LinearGradient
-          colors={cores.gradiente}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={estilos.destaque}>
-          <Text style={estilos.rotuloDestaque}>Valor total em stock</Text>
-          <Text style={estilos.valorDestaque}>{formatarMoeda(resumo?.valorTotal ?? 0)}</Text>
-          <View style={estilos.linhaDestaque}>
-            <Numero rotulo="Produtos" valor={resumo?.totalProdutos ?? 0} />
-            <View style={estilos.divisor} />
-            <Numero rotulo="Unidades" valor={resumo?.totalUnidades ?? 0} />
-          </View>
-        </LinearGradient>
+        <View style={estilos.blocoValor}>
+          <Rotulo>Valor total em stock</Rotulo>
+          <Text style={estilos.valor} numberOfLines={1} adjustsFontSizeToFit>
+            {formatarMoeda(resumo?.valorTotal ?? 0)}
+          </Text>
+        </View>
+        <View style={estilos.grade}>
+          <Numero rotulo="Produtos" valor={resumo?.totalProdutos ?? 0} />
+          <View style={estilos.divisorVertical} />
+          <Numero rotulo="Unidades" valor={resumo?.totalUnidades ?? 0} />
+        </View>
 
         {alertas > 0 && (
           <Pressable
-            style={estilos.aviso}
+            style={({ pressed }) => [estilos.aviso, pressed && { opacity: 0.85 }]}
             onPress={() => router.push({ pathname: '/produtos', params: { filtro: 'alerta' } })}>
-            <Ionicons name="warning" size={20} color={cores.alerta} />
+            <Ionicons name="warning-outline" size={20} color={cores.alerta} />
             <Text style={estilos.textoAviso}>
-              {resumo?.stockBaixo} com stock baixo · {resumo?.esgotados} esgotados
+              <Text style={estilos.numeroAviso}>{resumo?.stockBaixo}</Text> com stock baixo ·{' '}
+              <Text style={estilos.numeroAviso}>{resumo?.esgotados}</Text> esgotados
             </Text>
-            <Ionicons name="chevron-forward" size={18} color={cores.alerta} />
+            <Ionicons name="arrow-forward" size={18} color={cores.alerta} />
           </Pressable>
         )}
 
-        <Text style={estilos.secao}>O que deseja fazer?</Text>
-
-        <CartaoAcao
-          icone="scan"
-          titulo="Escanear código"
-          subtitulo="Leia um código de barras para encontrar ou cadastrar um produto"
-          gradiente={cores.gradienteScanner}
-          aoPressionar={() => router.push('/escanear')}
-        />
-        <CartaoAcao
-          icone="layers"
-          titulo="Gerenciar stock"
-          subtitulo="Veja, pesquise e ajuste as quantidades dos seus produtos"
-          gradiente={cores.gradiente}
-          aoPressionar={() => router.push('/produtos')}
-        />
-
-        <Pressable style={estilos.manual} onPress={() => router.push('/formulario-produto')}>
-          <View style={estilos.iconeManual}>
-            <Ionicons name="create-outline" size={22} color={cores.primaria} />
+        <Rotulo estilo={estilos.tituloSecao}>O que deseja fazer?</Rotulo>
+        <View style={estilos.acoes}>
+          <Pressable
+            onPress={() => router.push('/escanear')}
+            style={({ pressed }) => [
+              estilos.acaoPrincipal,
+              pressed && { backgroundColor: cores.primariaPressionada },
+            ]}>
+            <View style={estilos.topoAcao}>
+              <Text style={estilos.numeroAcaoPrincipal}>01</Text>
+              <Ionicons name="scan" size={40} color={cores.textoSobrePrimaria} />
+            </View>
+            <View style={{ gap: 4 }}>
+              <Text style={estilos.tituloAcaoPrincipal}>Escanear código</Text>
+              <Text style={estilos.subtituloAcaoPrincipal}>
+                Encontre ou cadastre um produto pelo código de barras
+              </Text>
+            </View>
+          </Pressable>
+          <View style={estilos.linhaAcoes}>
+            <CartaoAcao
+              numero="02"
+              icone="layers-outline"
+              titulo="Gerenciar stock"
+              subtitulo="Veja, pesquise e ajuste quantidades"
+              preenchido
+              aoPressionar={() => router.push('/produtos')}
+            />
+            <CartaoAcao
+              numero="03"
+              icone="create-outline"
+              titulo="Adicionar manualmente"
+              subtitulo="Cadastre sem escanear"
+              aoPressionar={() => router.push('/formulario-produto')}
+            />
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={estilos.tituloManual}>Adicionar manualmente</Text>
-            <Text style={estilos.subtituloManual}>Cadastre um produto sem escanear</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={cores.textoSuave} />
-        </Pressable>
+        </View>
 
-        <Text style={estilos.secao}>Aparência</Text>
-        <SeletorTema />
-
-        <Botao
-          titulo={modoTeste ? 'Sair do modo Teste' : 'Sair e escolher outro usuário'}
-          icone="log-out-outline"
-          variante="perigo"
-          aoPressionar={confirmarSaida}
-          estilo={{ marginTop: espaco(4) }}
-        />
+        <View style={estilos.rodape}>
+          <Rotulo>Aparência</Rotulo>
+          <SeletorTema />
+          <Botao
+            titulo={modoTeste ? 'Sair do modo Teste' : 'Sair e escolher outro usuário'}
+            icone="log-out-outline"
+            variante="perigo"
+            aoPressionar={confirmarSaida}
+            estilo={{ marginTop: espaco(2) }}
+          />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -174,24 +181,26 @@ export default function TelaInicial() {
 function Numero({ rotulo, valor }: { rotulo: string; valor: number }) {
   const estilos = useEstilos(criarEstilos);
   return (
-    <View style={{ flex: 1 }}>
+    <Pressable style={estilos.celula} onPress={() => router.push('/produtos')}>
       <Text style={estilos.valorNumero}>{valor}</Text>
       <Text style={estilos.rotuloNumero}>{rotulo}</Text>
-    </View>
+    </Pressable>
   );
 }
 
 function CartaoAcao({
+  numero,
   icone,
   titulo,
   subtitulo,
-  gradiente,
+  preenchido,
   aoPressionar,
 }: {
+  numero: string;
   icone: NomeIcone;
   titulo: string;
   subtitulo: string;
-  gradiente: readonly [string, string];
+  preenchido?: boolean;
   aoPressionar: () => void;
 }) {
   const { cores } = useTema();
@@ -199,137 +208,152 @@ function CartaoAcao({
   return (
     <Pressable
       onPress={aoPressionar}
-      style={({ pressed }) => [estilos.acao, pressed && { transform: [{ scale: 0.98 }] }]}>
-      <LinearGradient colors={gradiente} style={estilos.iconeAcao}>
-        <Ionicons name={icone} size={30} color="#fff" />
-      </LinearGradient>
-      <View style={{ flex: 1, gap: 4 }}>
+      style={({ pressed }) => [
+        estilos.acao,
+        preenchido ? estilos.acaoPreenchida : estilos.acaoContorno,
+        pressed && { backgroundColor: preenchido ? cores.superficieSuave : cores.superficie },
+      ]}>
+      <View style={estilos.topoAcao}>
+        <Text style={estilos.numeroAcao}>{numero}</Text>
+        <Ionicons name={icone} size={26} color={cores.texto} />
+      </View>
+      <View style={{ gap: 4 }}>
         <Text style={estilos.tituloAcao}>{titulo}</Text>
         <Text style={estilos.subtituloAcao}>{subtitulo}</Text>
-      </View>
-      <View style={estilos.setaAcao}>
-        <Ionicons name="arrow-forward" size={18} color={cores.texto} />
       </View>
     </Pressable>
   );
 }
 
-const criarEstilos = ({ cores, sombra }: Tema) => StyleSheet.create({
+const criarEstilos = ({ cores }: Tema) => StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.fundo },
-  conteudo: { padding: espaco(5), gap: espaco(4), paddingBottom: espaco(10) },
-  cabecalho: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  conteudo: { paddingBottom: espaco(10) },
+  cabecalho: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: espaco(3),
+    paddingHorizontal: espaco(5),
+    paddingTop: espaco(2),
+    paddingBottom: espaco(4),
+  },
   usuario: { flexDirection: 'row', alignItems: 'center', gap: espaco(3), flexShrink: 1 },
   seloCamera: {
     position: 'absolute',
-    right: -3,
-    bottom: -3,
+    right: -4,
+    bottom: -4,
     width: 20,
     height: 20,
-    borderRadius: 10,
-    backgroundColor: cores.primaria,
+    borderRadius: raio.pequeno,
+    backgroundColor: cores.texto,
     borderWidth: 2,
     borderColor: cores.fundo,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  ola: { fontSize: 13, fontFamily: fonte.normal, color: cores.textoSuave },
+  titulo: { fontSize: 24, fontFamily: fonte.forte, color: cores.texto, letterSpacing: -0.5 },
   botoesTopo: { flexDirection: 'row', alignItems: 'center', gap: espaco(2) },
   botaoSair: {
-    width: 48,
-    height: 48,
+    width: 44,
+    height: 44,
     borderRadius: raio.medio,
-    backgroundColor: cores.superficie,
+    borderWidth: 1.5,
+    borderColor: cores.divisor,
     alignItems: 'center',
     justifyContent: 'center',
-    ...sombra,
   },
-  faixaTeste: {
+  faixa: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    backgroundColor: cores.superficieSuave,
-    borderRadius: raio.medio,
-    padding: espaco(3),
+    gap: 10,
+    backgroundColor: cores.superficie,
+    borderTopWidth: linha.forte,
+    borderTopColor: cores.divisor,
+    paddingHorizontal: espaco(5),
+    paddingVertical: espaco(3),
   },
-  textoFaixaTeste: { flex: 1, color: cores.texto, fontSize: 13 },
-  linkFaixaTeste: { color: cores.primaria, fontWeight: '700' },
+  textoFaixa: { flex: 1, color: cores.texto, fontSize: 13, fontFamily: fonte.normal },
+  linkFaixa: { color: cores.primariaForte, fontFamily: fonte.forte },
   erro: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    marginHorizontal: espaco(5),
+    marginBottom: espaco(3),
     backgroundColor: cores.perigoFundo,
     borderRadius: raio.medio,
     padding: espaco(4),
   },
-  textoErro: { flex: 1, color: cores.perigo, fontWeight: '600' },
-  ola: { fontSize: 15, color: cores.textoSuave },
-  titulo: { fontSize: 26, fontWeight: '800', color: cores.texto, letterSpacing: -0.5 },
-  destaque: { borderRadius: raio.grande, padding: espaco(6), gap: 6 },
-  rotuloDestaque: { color: 'rgba(255,255,255,0.8)', fontSize: 14, fontWeight: '600' },
-  valorDestaque: { color: '#fff', fontSize: 34, fontWeight: '800', letterSpacing: -1 },
-  linhaDestaque: {
-    flexDirection: 'row',
-    marginTop: espaco(4),
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: raio.medio,
-    padding: espaco(4),
+  textoErro: { flex: 1, color: cores.perigo, fontFamily: fonte.media },
+  blocoValor: {
+    borderTopWidth: linha.forte,
+    borderTopColor: cores.divisor,
+    paddingHorizontal: espaco(5),
+    paddingTop: espaco(5),
+    paddingBottom: espaco(5),
+    gap: 6,
   },
-  divisor: { width: 1, backgroundColor: 'rgba(255,255,255,0.3)', marginHorizontal: espaco(4) },
-  valorNumero: { color: '#fff', fontSize: 22, fontWeight: '800' },
-  rotuloNumero: { color: 'rgba(255,255,255,0.8)', fontSize: 13 },
+  valor: { fontSize: 46, fontFamily: fonte.forte, color: cores.texto, letterSpacing: -1.8 },
+  grade: { flexDirection: 'row', borderTopWidth: linha.forte, borderTopColor: cores.divisor },
+  celula: { flex: 1, paddingHorizontal: espaco(5), paddingVertical: espaco(4), gap: 2 },
+  divisorVertical: { width: linha.forte, backgroundColor: cores.divisor },
+  valorNumero: { fontSize: 32, fontFamily: fonte.forte, color: cores.texto, letterSpacing: -1 },
+  rotuloNumero: { fontSize: 13, fontFamily: fonte.normal, color: cores.textoSuave },
   aviso: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
     backgroundColor: cores.alertaFundo,
-    borderRadius: raio.medio,
-    padding: espaco(4),
+    borderTopWidth: linha.forte,
+    borderBottomWidth: linha.forte,
+    borderColor: cores.primaria,
+    paddingHorizontal: espaco(5),
+    paddingVertical: espaco(3.5),
   },
-  textoAviso: { flex: 1, color: cores.alerta, fontWeight: '700' },
-  secao: { fontSize: 18, fontWeight: '800', color: cores.texto, marginTop: espaco(2) },
+  textoAviso: { flex: 1, color: cores.alerta, fontSize: 14, fontFamily: fonte.media },
+  numeroAviso: { fontFamily: fonte.forte },
+  tituloSecao: { paddingHorizontal: espaco(5), paddingTop: espaco(6), paddingBottom: espaco(2.5) },
+  acoes: { paddingHorizontal: espaco(5), gap: espaco(2) },
+  acaoPrincipal: {
+    minHeight: 168,
+    justifyContent: 'space-between',
+    padding: espaco(4),
+    borderRadius: raio.grande,
+    backgroundColor: cores.primariaEscura,
+  },
+  topoAcao: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  numeroAcaoPrincipal: { fontSize: 12, fontFamily: fonte.media, color: cores.textoSobrePrimaria },
+  tituloAcaoPrincipal: {
+    fontSize: 28,
+    fontFamily: fonte.forte,
+    color: cores.textoSobrePrimaria,
+    letterSpacing: -0.6,
+  },
+  subtituloAcaoPrincipal: {
+    fontSize: 14,
+    fontFamily: fonte.media,
+    color: cores.textoSobrePrimaria,
+    lineHeight: 19,
+  },
+  linhaAcoes: { flexDirection: 'row', gap: espaco(2) },
   acao: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: espaco(4),
-    backgroundColor: cores.superficie,
+    flex: 1,
+    minHeight: 150,
+    justifyContent: 'space-between',
+    padding: espaco(3.5),
     borderRadius: raio.grande,
-    padding: espaco(4),
-    ...sombra,
   },
-  iconeAcao: {
-    width: 64,
-    height: 64,
-    borderRadius: raio.medio,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tituloAcao: { fontSize: 18, fontWeight: '800', color: cores.texto },
-  subtituloAcao: { fontSize: 13, color: cores.textoSuave, lineHeight: 18 },
-  setaAcao: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: cores.superficieSuave,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  manual: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  acaoPreenchida: { backgroundColor: cores.superficie },
+  acaoContorno: { borderWidth: linha.forte, borderColor: cores.divisor },
+  numeroAcao: { fontSize: 12, fontFamily: fonte.media, color: cores.primariaForte },
+  tituloAcao: { fontSize: 18, fontFamily: fonte.forte, color: cores.texto, lineHeight: 21 },
+  subtituloAcao: { fontSize: 12, fontFamily: fonte.normal, color: cores.textoSuave, lineHeight: 16 },
+  rodape: {
+    marginTop: espaco(7),
+    borderTopWidth: linha.forte,
+    borderTopColor: cores.divisor,
+    padding: espaco(5),
     gap: espaco(3),
-    borderRadius: raio.grande,
-    padding: espaco(4),
-    borderWidth: 1.5,
-    borderStyle: 'dashed',
-    borderColor: cores.borda,
   },
-  iconeManual: {
-    width: 44,
-    height: 44,
-    borderRadius: raio.pequeno,
-    backgroundColor: cores.superficieSuave,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tituloManual: { fontSize: 16, fontWeight: '700', color: cores.texto },
-  subtituloManual: { fontSize: 13, color: cores.textoSuave },
 });

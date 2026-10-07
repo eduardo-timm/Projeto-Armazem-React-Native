@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { espaco, raio, useEstilos, useTema, type PreferenciaTema, type Tema } from '../tema';
+import { espaco, fonte, raio, useEstilos, useTema, type PreferenciaTema, type Tema } from '../tema';
 import type { NomeIcone } from './ui';
 
 const OPCOES: { valor: PreferenciaTema; rotulo: string; icone: NomeIcone }[] = [
@@ -11,15 +11,16 @@ const OPCOES: { valor: PreferenciaTema; rotulo: string; icone: NomeIcone }[] = [
   { valor: 'escuro', rotulo: 'Escuro', icone: 'moon-outline' },
 ];
 
-/** Controle segmentado para escolher o tema: Sistema / Claro / Escuro. */
+/** Controle segmentado (Sistema / Claro / Escuro): a opção escolhida fica vermelha. */
 export function SeletorTema() {
   const { cores, preferencia, definirPreferencia } = useTema();
   const estilos = useEstilos(criarEstilos);
 
   return (
     <View style={estilos.grupo}>
-      {OPCOES.map((opcao) => {
+      {OPCOES.map((opcao, i) => {
         const selecionada = preferencia === opcao.valor;
+        const frente = selecionada ? cores.textoSobrePrimaria : cores.texto;
         return (
           <Pressable
             key={opcao.valor}
@@ -27,15 +28,14 @@ export function SeletorTema() {
               Haptics.selectionAsync();
               definirPreferencia(opcao.valor);
             }}
-            style={[estilos.opcao, selecionada && estilos.opcaoSelecionada]}>
-            <Ionicons
-              name={opcao.icone}
-              size={18}
-              color={selecionada ? cores.primaria : cores.textoSuave}
-            />
-            <Text style={[estilos.rotulo, selecionada && { color: cores.texto }]}>
-              {opcao.rotulo}
-            </Text>
+            style={({ pressed }) => [
+              estilos.opcao,
+              i > 0 && estilos.separador,
+              selecionada && { backgroundColor: cores.primaria },
+              pressed && !selecionada && { backgroundColor: cores.superficie },
+            ]}>
+            <Ionicons name={opcao.icone} size={16} color={frente} />
+            <Text style={[estilos.rotulo, { color: frente }]}>{opcao.rotulo}</Text>
           </Pressable>
         );
       })}
@@ -43,7 +43,7 @@ export function SeletorTema() {
   );
 }
 
-/** Botão redondo que alterna rapidamente entre claro e escuro. */
+/** Botão quadrado que alterna rapidamente entre claro e escuro. */
 export function BotaoAlternarTema() {
   const { cores, esquema, alternarEsquema } = useTema();
   const estilos = useEstilos(criarEstilos);
@@ -56,38 +56,37 @@ export function BotaoAlternarTema() {
       }}
       hitSlop={8}
       accessibilityLabel={esquema === 'escuro' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
-      style={({ pressed }) => [estilos.botaoAlternar, pressed && { transform: [{ scale: 0.94 }] }]}>
-      <Ionicons name={esquema === 'escuro' ? 'sunny' : 'moon'} size={22} color={cores.primaria} />
+      style={({ pressed }) => [estilos.botaoAlternar, pressed && { backgroundColor: cores.superficie }]}>
+      <Ionicons name={esquema === 'escuro' ? 'sunny-outline' : 'moon-outline'} size={20} color={cores.texto} />
     </Pressable>
   );
 }
 
-const criarEstilos = ({ cores, sombra }: Tema) => StyleSheet.create({
+const criarEstilos = ({ cores }: Tema) => StyleSheet.create({
   grupo: {
     flexDirection: 'row',
-    backgroundColor: cores.superficieSuave,
+    borderWidth: 1.5,
+    borderColor: cores.divisor,
     borderRadius: raio.medio,
-    padding: 4,
-    gap: 4,
+    overflow: 'hidden',
   },
   opcao: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     gap: 6,
-    paddingVertical: espaco(3),
-    borderRadius: raio.medio - 4,
+    minHeight: 46,
+    paddingHorizontal: espaco(3),
   },
-  opcaoSelecionada: { backgroundColor: cores.superficie, ...sombra, shadowOpacity: sombra.shadowOpacity / 2 },
-  rotulo: { fontSize: 14, fontWeight: '700', color: cores.textoSuave },
+  separador: { borderLeftWidth: 1.5, borderLeftColor: cores.divisor },
+  rotulo: { fontSize: 14, fontFamily: fonte.media },
   botaoAlternar: {
-    width: 48,
-    height: 48,
+    width: 44,
+    height: 44,
     borderRadius: raio.medio,
-    backgroundColor: cores.superficie,
+    borderWidth: 1.5,
+    borderColor: cores.divisor,
     alignItems: 'center',
     justifyContent: 'center',
-    ...sombra,
   },
 });

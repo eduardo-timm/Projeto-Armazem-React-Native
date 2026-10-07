@@ -3,7 +3,7 @@ import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { espaco, raio, useEstilos, useTema, type Tema } from '../tema';
+import { espaco, fonte, raio, useEstilos, useTema, type Tema } from '../tema';
 import { mostrarErro } from '../utilitarios/erros';
 import { escolherFoto, type OrigemFoto } from '../utilitarios/fotos';
 import { FotoProduto } from './FotoProduto';
@@ -52,7 +52,7 @@ export function SeletorFoto({
           {foto ? (
             <FotoProduto foto={foto} estilo={StyleSheet.absoluteFill} />
           ) : (
-            <Ionicons name="camera-outline" size={32} color={cores.primaria} />
+            <Ionicons name="camera-outline" size={30} color={cores.primariaForte} />
           )}
           {preparando && (
             <View style={estilos.carregando}>
@@ -67,13 +67,13 @@ export function SeletorFoto({
           </Text>
           <View style={estilos.linhaBotoes}>
             <BotaoFoto
-              icone="camera"
+              icone="camera-outline"
               titulo="Câmera"
               aoPressionar={() => escolher('camera')}
               desabilitado={preparando}
             />
             <BotaoFoto
-              icone="images"
+              icone="images-outline"
               titulo="Galeria"
               aoPressionar={() => escolher('galeria')}
               desabilitado={preparando}
@@ -109,9 +109,10 @@ function BotaoFoto({
       disabled={desabilitado}
       style={({ pressed }) => [
         estilos.botao,
-        { opacity: desabilitado ? 0.5 : pressed ? 0.8 : 1 },
+        { opacity: desabilitado ? 0.45 : 1 },
+        pressed && { backgroundColor: cores.superficie },
       ]}>
-      <Ionicons name={icone} size={16} color={cores.primaria} />
+      <Ionicons name={icone} size={16} color={cores.texto} />
       <Text style={estilos.textoBotao}>{titulo}</Text>
     </Pressable>
   );
@@ -120,26 +121,17 @@ function BotaoFoto({
 const TAMANHO_PREVIA = 104;
 
 const criarEstilos = ({ cores }: Tema) => StyleSheet.create({
-  rotulo: { fontSize: 13, fontWeight: '600', color: cores.textoSuave, marginLeft: 4 },
-  caixa: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: espaco(4),
-    backgroundColor: cores.superficie,
-    borderWidth: 1,
-    borderColor: cores.borda,
-    borderRadius: raio.medio,
-    padding: espaco(3),
-  },
+  rotulo: { fontSize: 12, fontFamily: fonte.media, color: cores.textoSuave },
+  caixa: { flexDirection: 'row', alignItems: 'center', gap: espaco(4) },
   previa: {
     width: TAMANHO_PREVIA,
     height: TAMANHO_PREVIA,
-    borderRadius: raio.pequeno,
+    borderRadius: raio.medio,
     overflow: 'hidden',
-    backgroundColor: cores.superficieSuave,
-    borderWidth: 1.5,
+    backgroundColor: cores.superficie,
+    borderWidth: 2,
     borderStyle: 'dashed',
-    borderColor: cores.borda,
+    borderColor: cores.divisor,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -151,17 +143,18 @@ const criarEstilos = ({ cores }: Tema) => StyleSheet.create({
     justifyContent: 'center',
   },
   acoes: { flex: 1, gap: espaco(2) },
-  dica: { fontSize: 13, color: cores.textoSuave, lineHeight: 18 },
+  dica: { fontSize: 13, fontFamily: fonte.normal, color: cores.textoSuave, lineHeight: 18 },
   linhaBotoes: { flexDirection: 'row', flexWrap: 'wrap', gap: espaco(2) },
   botao: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    minHeight: 40,
     paddingHorizontal: espaco(3),
-    paddingVertical: 8,
-    borderRadius: raio.pilula,
-    backgroundColor: cores.superficieSuave,
+    borderRadius: raio.pequeno,
+    borderWidth: 1.5,
+    borderColor: cores.divisor,
   },
-  textoBotao: { fontSize: 13, fontWeight: '700', color: cores.primaria },
-  remover: { fontSize: 13, fontWeight: '600', color: cores.perigo },
+  textoBotao: { fontSize: 13, fontFamily: fonte.forte, color: cores.texto },
+  remover: { fontSize: 13, fontFamily: fonte.media, color: cores.primariaForte },
 });

@@ -5,23 +5,25 @@ import { StyleSheet, Text, View } from 'react-native';
 import { fonteDaFoto } from '../banco/supabase';
 import { usePerfis } from '../perfis';
 import { useSessao, type Usuario } from '../sessao';
+import { fonte } from '../tema';
 
+/** Tons do próprio sistema (tinta, vermelho e cinzas) em vez de cores soltas. */
 export const CORES_USUARIO: Record<Usuario, string> = {
-  Eduardo: '#5B5BF7',
-  Tomás: '#10B9A5',
-  Tiago: '#F59E0B',
-  Teste: '#94A3B8',
+  Eduardo: '#2D2B2B',
+  Tomás: '#DD2B0F',
+  Tiago: '#7D7979',
+  Teste: '#9B9797',
 };
 
 /**
- * Círculo com a foto de perfil da pessoa. Sem foto (ou enquanto ela carrega), mostra a
- * inicial sobre a cor da pessoa.
+ * Quadrado com cantos suaves e a foto de perfil da pessoa. Sem foto (ou enquanto ela carrega),
+ * mostra a inicial no canto de baixo, sobre a cor da pessoa.
  */
 export function Avatar({ nome, tamanho = 40 }: { nome: Usuario; tamanho?: number }) {
   const { acesso } = useSessao();
   const { fotoDe } = usePerfis();
   const foto = fotoDe(nome);
-  const fonte = useMemo(
+  const fonteFoto = useMemo(
     () => (foto && acesso ? fonteDaFoto(acesso, foto) : null),
     [acesso, foto]
   );
@@ -29,18 +31,21 @@ export function Avatar({ nome, tamanho = 40 }: { nome: Usuario; tamanho?: number
   return (
     <View
       style={[
-        estilos.circulo,
+        estilos.quadrado,
         {
           width: tamanho,
           height: tamanho,
-          borderRadius: tamanho / 2,
+          borderRadius: Math.round(tamanho * 0.22),
+          padding: Math.round(tamanho * 0.12),
           backgroundColor: CORES_USUARIO[nome],
         },
       ]}>
-      <Text style={[estilos.inicial, { fontSize: tamanho * 0.42 }]}>{nome.charAt(0)}</Text>
-      {fonte && (
+      <Text style={[estilos.inicial, { fontSize: tamanho * 0.44, lineHeight: tamanho * 0.48 }]}>
+        {nome.charAt(0)}
+      </Text>
+      {fonteFoto && (
         <Image
-          source={fonte}
+          source={fonteFoto}
           style={StyleSheet.absoluteFill}
           contentFit="cover"
           transition={150}
@@ -53,6 +58,6 @@ export function Avatar({ nome, tamanho = 40 }: { nome: Usuario; tamanho?: number
 }
 
 const estilos = StyleSheet.create({
-  circulo: { alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
-  inicial: { color: '#fff', fontWeight: '800' },
+  quadrado: { alignItems: 'flex-start', justifyContent: 'flex-end', overflow: 'hidden' },
+  inicial: { color: '#fff', fontFamily: fonte.forte },
 });
