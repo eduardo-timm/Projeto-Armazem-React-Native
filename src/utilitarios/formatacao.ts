@@ -13,6 +13,19 @@ export function converterDecimal(texto: string) {
   return Number.isFinite(n) ? n : 0;
 }
 
+/**
+ * Máscara de preço ao digitar: os números entram pela direita e a vírgula fica sempre
+ * antes dos dois últimos (1 → "0,01", 1250 → "12,50", 123456 → "1.234,56").
+ * Apagar tudo deixa o campo vazio. O resultado é lido por `converterDecimal`.
+ */
+export function mascararMoeda(texto: string) {
+  const digitos = texto.replace(/\D/g, '').replace(/^0+/, '').slice(0, 11);
+  if (!digitos) return '';
+  const completo = digitos.padStart(3, '0');
+  const inteiro = completo.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return `${inteiro},${completo.slice(-2)}`;
+}
+
 export function converterInteiro(texto: string) {
   const n = parseInt(texto.replace(/\D/g, ''), 10);
   return Number.isFinite(n) ? n : 0;

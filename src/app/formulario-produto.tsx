@@ -19,7 +19,7 @@ import { Botao, Campo } from '../componentes/ui';
 import { useSessaoAtiva } from '../sessao';
 import { espaco, useEstilos, type Tema } from '../tema';
 import { mostrarErro } from '../utilitarios/erros';
-import { converterDecimal, converterInteiro } from '../utilitarios/formatacao';
+import { converterDecimal, converterInteiro, mascararMoeda } from '../utilitarios/formatacao';
 
 type Erros = Partial<Record<'nome' | 'codigo', string>>;
 
@@ -58,7 +58,7 @@ export default function TelaFormularioProduto() {
         setCategoria(p.categoria);
         setDescricao(p.descricao ?? '');
         setQuantidadeMinima(String(p.quantidade_minima));
-        setPreco(p.preco_unitario ? p.preco_unitario.toFixed(2).replace('.', ',') : '');
+        setPreco(p.preco_unitario ? mascararMoeda(p.preco_unitario.toFixed(2)) : '');
         setFoto(p.caminho_foto);
         setFotoOriginal(p.caminho_foto);
       })
@@ -182,9 +182,9 @@ export default function TelaFormularioProduto() {
           rotulo="Preço unitário (R$)"
           icone="cash-outline"
           value={preco}
-          onChangeText={setPreco}
+          onChangeText={(texto) => setPreco(mascararMoeda(texto))}
           placeholder="0,00"
-          keyboardType="decimal-pad"
+          keyboardType="number-pad"
         />
         <Campo
           rotulo="Descrição"
