@@ -224,6 +224,74 @@ export async function excluirCategoria(db: ClienteSupabase, nome: string) {
   verificar(await db.from('categorias').delete().eq('nome', nome));
 }
 
+export type ItemLista = Database['public']['Tables']['itens_lista']['Row'];
+
+/** Itens da lista de compras: primeiro os que faltam comprar, depois os comprados. */
+export async function listarItensLista(db: ClienteSupabase) {
+  return verificar(
+    await db
+      .from('itens_lista')
+      .select('*')
+      .order('comprado')
+      .order('criado_em', { ascending: true })
+  );
+}
+
+export async function criarItemLista(
+  db: ClienteSupabase,
+  texto: string,
+  anotacao: string | null,
+  usuario: Usuario
+) {
+  const criado = verificar(
+    await db
+      .from('itens_lista')
+      .insert({ texto: texto.trim(), anotacao: anotacao?.trim() || null, criado_por: usuario })
+      .select('*')
+      .single()
+  );
+  if (!criado) throw new Error('Não foi possível adicionar o item.');
+  return criado;
+}
+
+export async function editarItemLista(
+  db: ClienteSupabase,
+  id: string,
+  texto: string,
+  anotacao: string | null
+) {
+  verificar(
+    await db
+      .from('itens_lista')
+      .update({ texto: texto.trim(), anotacao: anotacao?.trim() || null })
+      .eq('id', id)
+  );
+}
+
+/** Marca ou desmarca como comprado (guardando quem marcou). */
+export async function marcarItemLista(
+  db: ClienteSupabase,
+  id: string,
+  comprado: boolean,
+  usuario: Usuario
+) {
+  verificar(
+    await db
+      .from('itens_lista')
+      .update({ comprado, comprado_por: comprado ? usuario : null })
+      .eq('id', id)
+  );
+}
+
+export async function excluirItemLista(db: ClienteSupabase, id: string) {
+  verificar(await db.from('itens_lista').delete().eq('id', id));
+}
+
+/** Apaga de uma vez todos os itens já comprados. */
+export async function limparItensComprados(db: ClienteSupabase) {
+  verificar(await db.from('itens_lista').delete().eq('comprado', true));
+}
+
 export async function obterResumo(db: ClienteSupabase): Promise<ResumoStock> {
   return verificar(await db.rpc('resumo_stock')) as ResumoStock;
 }

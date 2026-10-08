@@ -63,6 +63,7 @@ function Navegacao() {
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="produtos/index" options={{ title: 'Produtos' }} />
           <Stack.Screen name="produtos/[id]" options={{ title: 'Detalhes' }} />
+          <Stack.Screen name="lista-compras" options={{ title: 'Lista de compras' }} />
           <Stack.Screen
             name="escanear"
             options={{ headerShown: false, animation: 'fade_from_bottom' }}

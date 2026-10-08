@@ -64,6 +64,7 @@ src/
     produtos/index.tsx         # Lista com pesquisa e filtros (param: filtro?)
     produtos/[id].tsx          # Detalhes + entrada/saída + excluir
     perfil.tsx                 # Modal: foto de perfil de quem está usando (câmera/galeria/remover)
+    lista-compras.tsx          # Lista de compras/anotações da equipe: marcar, editar, excluir
   banco/
     banco.ts                   # Todas as consultas ao Supabase (telas não chamam o Supabase direto)
     supabase.ts                # Cria o cliente com os cabeçalhos de acesso
@@ -159,7 +160,7 @@ Projeto **"Estoque App"** (`ttbofisxluiptraogxpi`). URL e chave publicável fica
   Todo mundo vai precisar digitar o código novo.
 - O nome escolhido em "Quem é você?" vai em `movimentacoes.usuario`
   (check: 'Eduardo', 'Tomás', 'Tiago', 'Teste'). Para adicionar alguém: migração alterando
-  esse check (em `movimentacoes` **e** `perfis`) + `USUARIOS_EQUIPE` em `sessao.tsx` + cor em
+  esse check (em `movimentacoes`, `perfis` **e** `itens_lista`: `criado_por`/`comprado_por`) + `USUARIOS_EQUIPE` em `sessao.tsx` + cor em
   `Avatar.tsx`.
 
 ### Tabelas e funções
@@ -179,6 +180,9 @@ Projeto **"Estoque App"** (`ttbofisxluiptraogxpi`). URL e chave publicável fica
 - `perfis`: espaco + usuario (chave primária), caminho_foto, atualizado_em. Uma linha por pessoa
   e por espaço; o app grava com `upsert` (`onConflict: 'espaco,usuario'`).
 - `resumo_stock()`: números da tela inicial.
+- `itens_lista`: lista de compras/anotações. id, texto (até 120), anotacao (opcional, até 500),
+  comprado, criado_por, comprado_por, espaco, criado_em, atualizado_em. Mesmo RLS por espaço.
+  As consultas ficam em `banco.ts` (`listarItensLista`, `criarItemLista`, `marcarItemLista`…).
 
 ### Fotos dos produtos (Storage)
 

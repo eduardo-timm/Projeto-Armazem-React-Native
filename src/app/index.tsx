@@ -144,6 +144,13 @@ export default function TelaInicial() {
           gradiente={cores.gradiente}
           aoPressionar={() => router.push('/produtos')}
         />
+        <CartaoAcao
+          icone="cart"
+          titulo="Lista de compras"
+          subtitulo="Anote o que precisa comprar e marque o que já foi comprado"
+          gradiente={cores.gradienteScanner}
+          aoPressionar={() => router.push('/lista-compras')}
+        />
 
         <Pressable style={estilos.manual} onPress={() => router.push('/formulario-produto')}>
           <View style={estilos.iconeManual}>

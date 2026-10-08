@@ -33,6 +33,42 @@ export type Database = {
         }
         Relationships: []
       }
+      itens_lista: {
+        Row: {
+          anotacao: string | null
+          atualizado_em: string
+          comprado: boolean
+          comprado_por: string | null
+          criado_em: string
+          criado_por: string
+          espaco: string
+          id: string
+          texto: string
+        }
+        Insert: {
+          anotacao?: string | null
+          atualizado_em?: string
+          comprado?: boolean
+          comprado_por?: string | null
+          criado_em?: string
+          criado_por: string
+          espaco?: string
+          id?: string
+          texto: string
+        }
+        Update: {
+          anotacao?: string | null
+          atualizado_em?: string
+          comprado?: boolean
+          comprado_por?: string | null
+          criado_em?: string
+          criado_por?: string
+          espaco?: string
+          id?: string
+          texto?: string
+        }
+        Relationships: []
+      }
       movimentacoes: {
         Row: {
           criado_em: string
