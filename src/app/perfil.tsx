@@ -6,7 +6,7 @@ import { Avatar } from '../componentes/Avatar';
 import { Botao } from '../componentes/ui';
 import { usePerfis } from '../perfis';
 import { useSessaoAtiva } from '../sessao';
-import { espaco, useEstilos, type Tema } from '../tema';
+import { espaco, fonte, linha, useEstilos, type Tema } from '../tema';
 import { mostrarErro } from '../utilitarios/erros';
 import { escolherFoto, type OrigemFoto } from '../utilitarios/fotos';
 
@@ -42,25 +42,26 @@ export default function TelaPerfil() {
 
   return (
     <ScrollView contentContainerStyle={estilos.conteudo}>
+      <View style={estilos.regua} />
       <View style={estilos.topo}>
-        <Avatar nome={usuario} tamanho={160} />
+        <Avatar nome={usuario} tamanho={180} />
         <Text style={estilos.nome}>{usuario}</Text>
         <Text style={estilos.dica}>
           Sua foto aparece para toda a equipe, no início e no histórico de entradas e saídas.
         </Text>
       </View>
 
-      <View style={{ gap: espaco(3) }}>
+      <View style={estilos.acoes}>
         <Botao
           titulo="Tirar foto"
-          icone="camera"
+          icone="camera-outline"
           aoPressionar={() => executar('camera')}
           carregando={emAndamento === 'camera'}
           desabilitado={ocupado}
         />
         <Botao
           titulo="Escolher da galeria"
-          icone="images"
+          icone="images-outline"
           variante="secundario"
           aoPressionar={() => executar('galeria')}
           carregando={emAndamento === 'galeria'}
@@ -70,7 +71,7 @@ export default function TelaPerfil() {
           <Botao
             titulo="Remover foto"
             icone="trash-outline"
-            variante="perigo"
+            variante="fantasma"
             aoPressionar={() => executar('remover')}
             carregando={emAndamento === 'remover'}
             desabilitado={ocupado}
@@ -82,8 +83,15 @@ export default function TelaPerfil() {
 }
 
 const criarEstilos = ({ cores }: Tema) => StyleSheet.create({
-  conteudo: { padding: espaco(6), gap: espaco(8) },
-  topo: { alignItems: 'center', gap: espaco(2), marginTop: espaco(4) },
-  nome: { fontSize: 26, fontWeight: '800', color: cores.texto, marginTop: espaco(2) },
-  dica: { fontSize: 14, color: cores.textoSuave, textAlign: 'center', lineHeight: 20 },
+  conteudo: { paddingBottom: espaco(10) },
+  regua: { height: linha.forte, backgroundColor: cores.divisor },
+  topo: { padding: espaco(5), paddingTop: espaco(7), gap: espaco(3) },
+  nome: { fontSize: 34, fontFamily: fonte.forte, color: cores.texto, letterSpacing: -1, marginTop: espaco(2) },
+  dica: { fontSize: 14, fontFamily: fonte.normal, color: cores.textoSuave, lineHeight: 20 },
+  acoes: {
+    borderTopWidth: linha.forte,
+    borderTopColor: cores.divisor,
+    padding: espaco(5),
+    gap: espaco(2),
+  },
 });

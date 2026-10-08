@@ -2,11 +2,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { obterSituacao, type Produto } from '../banco/banco';
-import { espaco, raio, useEstilos, useTema, type Tema } from '../tema';
+import { espaco, fonte, linha, raio, useEstilos, useTema, type Tema } from '../tema';
 import { formatarMoeda } from '../utilitarios/formatacao';
 import { FotoProduto } from './FotoProduto';
 import { SeloSituacao } from './ui';
 
+/** Linha da lista de produtos (separada por uma linha fina, sem cartão flutuante). */
 export function CartaoProduto({ produto, aoPressionar }: { produto: Produto; aoPressionar: () => void }) {
   const { cores } = useTema();
   const estilos = useEstilos(criarEstilos);
@@ -15,15 +16,12 @@ export function CartaoProduto({ produto, aoPressionar }: { produto: Produto; aoP
   return (
     <Pressable
       onPress={aoPressionar}
-      style={({ pressed }) => [
-        estilos.cartao,
-        pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
-      ]}>
+      style={({ pressed }) => [estilos.linha, pressed && { backgroundColor: cores.superficie }]}>
       {produto.caminho_foto ? (
-        <FotoProduto foto={produto.caminho_foto} estilo={estilos.avatar} />
+        <FotoProduto foto={produto.caminho_foto} estilo={estilos.miniatura} />
       ) : (
-        <View style={estilos.avatar}>
-          <Text style={estilos.textoAvatar}>{inicial}</Text>
+        <View style={estilos.miniatura}>
+          <Text style={estilos.textoMiniatura}>{inicial}</Text>
         </View>
       )}
       <View style={{ flex: 1, gap: 4 }}>
@@ -31,11 +29,11 @@ export function CartaoProduto({ produto, aoPressionar }: { produto: Produto; aoP
           {produto.nome}
         </Text>
         <View style={estilos.linhaInfo}>
-          <Ionicons name="barcode-outline" size={14} color={cores.textoSuave} />
+          <Ionicons name="barcode-outline" size={13} color={cores.textoSuave} />
           <Text style={estilos.info} numberOfLines={1}>
             {produto.codigo_barras ?? 'Sem código'}
+            {produto.categoria ? ` · ${produto.categoria}` : ''}
           </Text>
-          {produto.categoria ? <Text style={estilos.info}>· {produto.categoria}</Text> : null}
         </View>
         <SeloSituacao situacao={obterSituacao(produto)} />
       </View>
@@ -50,30 +48,32 @@ export function CartaoProduto({ produto, aoPressionar }: { produto: Produto; aoP
   );
 }
 
-const criarEstilos = ({ cores, sombra }: Tema) => StyleSheet.create({
-  cartao: {
+const criarEstilos = ({ cores }: Tema) => StyleSheet.create({
+  linha: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: espaco(3),
-    backgroundColor: cores.superficie,
-    borderRadius: raio.grande,
-    padding: espaco(4),
-    ...sombra,
+    paddingHorizontal: espaco(5),
+    paddingVertical: espaco(3.5),
+    borderBottomWidth: linha.fina,
+    borderBottomColor: cores.borda,
   },
-  avatar: {
+  miniatura: {
     width: 52,
     height: 52,
     borderRadius: raio.medio,
-    backgroundColor: cores.superficieSuave,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: cores.superficie,
+    alignItems: 'flex-start',
+    justifyContent: 'flex-end',
+    padding: 6,
+    overflow: 'hidden',
   },
-  textoAvatar: { fontSize: 22, fontWeight: '800', color: cores.primaria },
-  nome: { fontSize: 16, fontWeight: '700', color: cores.texto },
+  textoMiniatura: { fontSize: 22, lineHeight: 24, fontFamily: fonte.forte, color: cores.texto },
+  nome: { fontSize: 16, fontFamily: fonte.forte, color: cores.texto },
   linhaInfo: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  info: { fontSize: 12, color: cores.textoSuave, flexShrink: 1 },
+  info: { fontSize: 12, fontFamily: fonte.normal, color: cores.textoSuave, flexShrink: 1 },
   direita: { alignItems: 'flex-end' },
-  quantidade: { fontSize: 22, fontWeight: '800', color: cores.texto },
-  rotuloQuantidade: { fontSize: 11, color: cores.textoSuave, marginTop: -2 },
-  preco: { fontSize: 12, color: cores.textoSuave, marginTop: 4 },
+  quantidade: { fontSize: 26, fontFamily: fonte.forte, color: cores.texto, letterSpacing: -0.5 },
+  rotuloQuantidade: { fontSize: 11, fontFamily: fonte.normal, color: cores.textoSuave, marginTop: -2 },
+  preco: { fontSize: 12, fontFamily: fonte.normal, color: cores.textoSuave, marginTop: 4 },
 });

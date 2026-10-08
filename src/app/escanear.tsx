@@ -22,7 +22,7 @@ import { buscarPorCodigo } from '../banco/banco';
 import { CameraSegura, type ControleCamera, type EstadoCamera } from '../componentes/CameraSegura';
 import { Botao, type NomeIcone } from '../componentes/ui';
 import { useSessaoAtiva } from '../sessao';
-import { espaco, raio, useEstilos, useTema, type Tema } from '../tema';
+import { espaco, fonte, linha, raio, useEstilos, useTema, type Tema } from '../tema';
 import { mostrarErro } from '../utilitarios/erros';
 
 export default function TelaEscanear() {
@@ -88,6 +88,7 @@ export default function TelaEscanear() {
             onChangeText={setCodigoDigitado}
             placeholder="Digite o código de barras"
             placeholderTextColor={cores.textoSuave}
+            selectionColor={cores.primaria}
             keyboardType="number-pad"
             returnKeyType="search"
             onSubmitEditing={() => abrirCodigo(codigoDigitado)}
@@ -95,10 +96,14 @@ export default function TelaEscanear() {
           />
         </View>
         <Pressable
-          style={[estilos.botaoIr, !codigoDigitado.trim() && { opacity: 0.4 }]}
+          style={({ pressed }) => [
+            estilos.botaoIr,
+            pressed && { backgroundColor: cores.primariaPressionada },
+            !codigoDigitado.trim() && { opacity: 0.45 },
+          ]}
           disabled={!codigoDigitado.trim()}
           onPress={() => abrirCodigo(codigoDigitado)}>
-          <Ionicons name="arrow-forward" size={22} color="#fff" />
+          <Ionicons name="arrow-forward" size={22} color={cores.textoSobrePrimaria} />
         </Pressable>
       </View>
       <Botao
@@ -126,24 +131,25 @@ export default function TelaEscanear() {
         style={estilos.tela}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <StatusBar style="light" />
-        <View style={{ paddingTop: margens.top + 8, paddingHorizontal: espaco(5) }}>
-          <BotaoRedondo icone="close" aoPressionar={() => router.back()} />
+        <View style={{ paddingTop: margens.top + 8, paddingHorizontal: espaco(4) }}>
+          <BotaoTopo icone="close" aoPressionar={() => router.back()} />
         </View>
-        <View style={[estilos.centro, { flex: 1, padding: espaco(8), gap: espaco(4) }]}>
+        <View style={estilos.permissao}>
           <View style={estilos.iconePermissao}>
-            <Ionicons name="camera" size={40} color="#fff" />
+            <Ionicons name="camera-outline" size={36} color="#fff" />
           </View>
           <Text style={estilos.tituloPermissao}>Acesso à câmera</Text>
           <Text style={estilos.textoPermissao}>
             Precisamos da câmera para ler os códigos de barras dos seus produtos.
           </Text>
           {permissao.canAskAgain ? (
-            <Botao titulo="Permitir câmera" icone="checkmark" aoPressionar={pedirPermissao} />
+            <Botao titulo="Permitir câmera" icone="checkmark" aoPressionar={pedirPermissao} estilo={{ alignSelf: 'stretch' }} />
           ) : (
             <Botao
               titulo="Abrir configurações"
               icone="settings-outline"
               aoPressionar={() => Linking.openSettings()}
+              estilo={{ alignSelf: 'stretch' }}
             />
           )}
         </View>
@@ -168,9 +174,9 @@ export default function TelaEscanear() {
         {/* Sobreposições são irmãs da câmera, nunca filhas (evita problemas de prévia no iOS). */}
         <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
           <View style={[estilos.barraTopo, { paddingTop: margens.top + 8 }]} pointerEvents="box-none">
-            <BotaoRedondo icone="close" aoPressionar={() => router.back()} />
+            <BotaoTopo icone="close" aoPressionar={() => router.back()} />
             <Text style={estilos.tituloTopo}>Escanear código</Text>
-            <BotaoRedondo
+            <BotaoTopo
               icone={lanterna ? 'flash' : 'flash-off'}
               aoPressionar={() => setLanterna((l) => !l)}
               ativo={lanterna}
@@ -179,23 +185,32 @@ export default function TelaEscanear() {
 
           <View style={estilos.areaMoldura} pointerEvents="none">
             <View style={estilos.moldura}>
-              <Canto estilo={{ top: 0, left: 0, borderTopWidth: 4, borderLeftWidth: 4 }} />
-              <Canto estilo={{ top: 0, right: 0, borderTopWidth: 4, borderRightWidth: 4 }} />
-              <Canto estilo={{ bottom: 0, left: 0, borderBottomWidth: 4, borderLeftWidth: 4 }} />
-              <Canto estilo={{ bottom: 0, right: 0, borderBottomWidth: 4, borderRightWidth: 4 }} />
+              <Canto estilo={{ top: 0, left: 0, borderTopWidth: 4, borderLeftWidth: 4, borderTopLeftRadius: raio.grande }} />
+              <Canto estilo={{ top: 0, right: 0, borderTopWidth: 4, borderRightWidth: 4, borderTopRightRadius: raio.grande }} />
+              <Canto estilo={{ bottom: 0, left: 0, borderBottomWidth: 4, borderLeftWidth: 4, borderBottomLeftRadius: raio.grande }} />
+              <Canto estilo={{ bottom: 0, right: 0, borderBottomWidth: 4, borderRightWidth: 4, borderBottomRightRadius: raio.grande }} />
+              <View style={estilos.linhaMira} />
             </View>
             <Text style={estilos.dica}>Aponte para o código de barras</Text>
           </View>
 
           {estadoCamera === 'falhou' ? (
             <View style={estilos.caixaFalha}>
-              <Ionicons name="alert-circle" size={22} color="#fff" />
-              <Text style={estilos.textoFalha}>Não foi possível iniciar a câmera.</Text>
-              <Botao titulo="Tentar de novo" aoPressionar={() => cameraRef.current?.reiniciar()} />
+              <View style={estilos.linhaFalha}>
+                <Ionicons name="alert-circle" size={20} color="#fff" />
+                <Text style={estilos.textoFalha}>Não foi possível iniciar a câmera.</Text>
+              </View>
+              <Botao
+                titulo="Tentar de novo"
+                icone="refresh"
+                variante="secundario"
+                aoPressionar={() => cameraRef.current?.reiniciar()}
+                estilo={{ borderColor: '#fff' }}
+              />
             </View>
           ) : (
             <Pressable style={estilos.pilulaReiniciar} onPress={() => cameraRef.current?.reiniciar()}>
-              <Ionicons name="refresh" size={16} color="#fff" />
+              <Ionicons name="refresh" size={15} color="#fff" />
               <Text style={estilos.textoReiniciar}>Câmera preta? Toque para reiniciar</Text>
             </Pressable>
           )}
@@ -206,7 +221,7 @@ export default function TelaEscanear() {
   );
 }
 
-function BotaoRedondo({
+function BotaoTopo({
   icone,
   aoPressionar,
   ativo,
@@ -215,13 +230,14 @@ function BotaoRedondo({
   aoPressionar: () => void;
   ativo?: boolean;
 }) {
+  const { cores } = useTema();
   const estilos = useEstilos(criarEstilos);
   return (
     <Pressable
       onPress={aoPressionar}
       hitSlop={8}
-      style={[estilos.redondo, ativo && { backgroundColor: '#FACC15' }]}>
-      <Ionicons name={icone} size={22} color={ativo ? '#000' : '#fff'} />
+      style={[estilos.botaoTopo, ativo && { backgroundColor: cores.primaria, borderColor: cores.primaria }]}>
+      <Ionicons name={icone} size={21} color="#fff" />
     </Pressable>
   );
 }
@@ -232,8 +248,9 @@ function Canto({ estilo }: { estilo: ViewStyle }) {
 }
 
 const LARGURA_MOLDURA = 280;
-const ALTURA_MOLDURA = 180;
+const ALTURA_MOLDURA = 170;
 
+// A tela do scanner é sempre escura (exceção às cores do tema, ver CLAUDE.md).
 const criarEstilos = ({ cores }: Tema) => StyleSheet.create({
   tela: { flex: 1, backgroundColor: '#000' },
   centro: { alignItems: 'center', justifyContent: 'center' },
@@ -241,30 +258,27 @@ const criarEstilos = ({ cores }: Tema) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: espaco(5),
+    paddingHorizontal: espaco(4),
   },
-  tituloTopo: { color: '#fff', fontSize: 17, fontWeight: '700' },
-  redondo: {
+  tituloTopo: { color: '#fff', fontSize: 17, fontFamily: fonte.forte },
+  botaoTopo: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    borderRadius: raio.medio,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.45)',
+    backgroundColor: 'rgba(0,0,0,0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   areaMoldura: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: espaco(5) },
-  moldura: { width: LARGURA_MOLDURA, height: ALTURA_MOLDURA },
-  canto: {
-    position: 'absolute',
-    width: 36,
-    height: 36,
-    borderColor: cores.destaque,
-    borderRadius: 6,
-  },
+  moldura: { width: LARGURA_MOLDURA, height: ALTURA_MOLDURA, justifyContent: 'center' },
+  canto: { position: 'absolute', width: 40, height: 40, borderColor: cores.destaque },
+  linhaMira: { height: linha.forte, marginHorizontal: espaco(4), backgroundColor: cores.destaque },
   dica: {
     color: '#fff',
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: fonte.media,
     backgroundColor: 'rgba(0,0,0,0.45)',
     paddingHorizontal: 14,
     paddingVertical: 8,
@@ -272,7 +286,7 @@ const criarEstilos = ({ cores }: Tema) => StyleSheet.create({
     overflow: 'hidden',
   },
   pilulaReiniciar: {
-    alignSelf: 'center',
+    alignSelf: 'flex-start',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
@@ -280,27 +294,32 @@ const criarEstilos = ({ cores }: Tema) => StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: raio.pilula,
-    marginBottom: espaco(4),
+    marginLeft: espaco(4),
+    marginBottom: espaco(4) + raio.grande,
   },
-  textoReiniciar: { color: '#fff', fontSize: 13 },
+  textoReiniciar: { color: '#fff', fontSize: 13, fontFamily: fonte.normal },
   caixaFalha: {
-    marginHorizontal: espaco(5),
-    marginBottom: espaco(4),
+    marginHorizontal: espaco(4),
+    marginBottom: espaco(4) + raio.grande,
     padding: espaco(4),
     gap: espaco(3),
     borderRadius: raio.grande,
-    backgroundColor: 'rgba(220,38,38,0.85)',
-    alignItems: 'center',
+    backgroundColor: 'rgba(174,24,0,0.92)',
   },
-  textoFalha: { color: '#fff', fontWeight: '700' },
+  linhaFalha: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  textoFalha: { color: '#fff', fontFamily: fonte.forte },
   painel: {
     backgroundColor: cores.fundo,
     borderTopLeftRadius: raio.grande,
     borderTopRightRadius: raio.grande,
-    padding: espaco(5),
+    borderTopWidth: linha.forte,
+    borderTopColor: cores.primaria,
+    marginTop: -raio.grande,
+    padding: espaco(4),
+    paddingTop: espaco(4.5),
     gap: espaco(3),
   },
-  tituloPainel: { fontSize: 16, fontWeight: '800', color: cores.texto },
+  tituloPainel: { fontSize: 17, fontFamily: fonte.forte, color: cores.texto },
   linhaManual: { flexDirection: 'row', gap: espaco(2) },
   caixaManual: {
     flex: 1,
@@ -309,12 +328,12 @@ const criarEstilos = ({ cores }: Tema) => StyleSheet.create({
     gap: 8,
     backgroundColor: cores.superficie,
     borderRadius: raio.medio,
-    borderWidth: 1,
-    borderColor: cores.borda,
-    paddingHorizontal: espaco(4),
+    borderWidth: 1.5,
+    borderColor: cores.divisor,
+    paddingHorizontal: espaco(3),
     height: 52,
   },
-  campoManual: { flex: 1, fontSize: 16, color: cores.texto },
+  campoManual: { flex: 1, fontSize: 16, fontFamily: fonte.normal, color: cores.texto },
   botaoIr: {
     width: 52,
     height: 52,
@@ -323,19 +342,20 @@ const criarEstilos = ({ cores }: Tema) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  permissao: { flex: 1, justifyContent: 'center', padding: espaco(6), gap: espaco(4) },
   iconePermissao: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
-    backgroundColor: cores.primaria,
+    width: 72,
+    height: 72,
+    borderRadius: raio.grande,
+    backgroundColor: cores.primariaEscura,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tituloPermissao: { color: '#fff', fontSize: 22, fontWeight: '800' },
+  tituloPermissao: { color: '#fff', fontSize: 28, fontFamily: fonte.forte, letterSpacing: -0.6 },
   textoPermissao: {
-    color: 'rgba(255,255,255,0.75)',
+    color: 'rgba(255,255,255,0.8)',
     fontSize: 15,
-    textAlign: 'center',
+    fontFamily: fonte.normal,
     lineHeight: 22,
   },
 });
